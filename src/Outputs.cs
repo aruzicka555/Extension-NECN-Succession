@@ -433,8 +433,9 @@ namespace Landis.Extension.Succession.NECN
 
             double[] nitrogenDeposition = new double[PlugIn.ModelCore.Ecoregions.Count];
             double[] streamN = new double[PlugIn.ModelCore.Ecoregions.Count];
-            double[] soilWaterContent = new double[PlugIn.ModelCore.Ecoregions.Count];
+            double[] soilWater = new double[PlugIn.ModelCore.Ecoregions.Count];
             double[] meanSoilWaterContent = new double[PlugIn.ModelCore.Ecoregions.Count];
+            double[] soilTemperature = new double[PlugIn.ModelCore.Ecoregions.Count];
             double[] anaerobicEffect = new double[PlugIn.ModelCore.Ecoregions.Count];
 
 
@@ -451,8 +452,9 @@ namespace Landis.Extension.Succession.NECN
                 avgNEE[ecoregion.Index] = 0.0;
                 nitrogenDeposition[ecoregion.Index] = 0.0;
                 streamN[ecoregion.Index] = 0.0;
-                soilWaterContent[ecoregion.Index] = 0.0;
+                soilWater[ecoregion.Index] = 0.0;
                 meanSoilWaterContent[ecoregion.Index] = 0.0;
+                soilTemperature[ecoregion.Index] = 0.0;
                 anaerobicEffect[ecoregion.Index] = 0.0;
             }
 
@@ -475,8 +477,9 @@ namespace Landis.Extension.Succession.NECN
 
                 nitrogenDeposition[ecoregion.Index] = ClimateRegionData.MonthlyNDeposition[ecoregion][month];
                 streamN[ecoregion.Index] += SiteVars.MonthlyStreamN[site][month];
-                soilWaterContent[ecoregion.Index] += SiteVars.MonthlySoilWaterContent[site][month];
+                soilWater[ecoregion.Index] += SiteVars.MonthlySoilWater[site][month];
                 meanSoilWaterContent[ecoregion.Index] += SiteVars.MonthlyMeanSoilWaterContent[site][month]; //SF added mean
+                soilTemperature[ecoregion.Index] += SiteVars.MonthlySoilTemperature[site][month]; //ML added
                 anaerobicEffect[ecoregion.Index] += SiteVars.MonthlyAnaerobicEffect[site][month]; //SF added 2023-4-11
             }
 
@@ -506,8 +509,9 @@ namespace Landis.Extension.Succession.NECN
                     ml.avgNEE = (avgNEE[ecoregion.Index] / (double)ClimateRegionData.ActiveSiteCount[ecoregion]);
                     ml.Ndep = nitrogenDeposition[ecoregion.Index];
                     ml.StreamN = (streamN[ecoregion.Index] / (double)ClimateRegionData.ActiveSiteCount[ecoregion]);
-                    ml.SoilWaterContent = (soilWaterContent[ecoregion.Index] / (double)ClimateRegionData.ActiveSiteCount[ecoregion]);
+                    ml.SoilWater = (soilWater[ecoregion.Index] / (double)ClimateRegionData.ActiveSiteCount[ecoregion]);
                     ml.meanSoilWaterContent = (meanSoilWaterContent[ecoregion.Index] / (double)ClimateRegionData.ActiveSiteCount[ecoregion]);
+                    ml.SoilTemperature = (soilTemperature[ecoregion.Index] / (double)ClimateRegionData.ActiveSiteCount[ecoregion]);
                     ml.AnaerobicEffect = (anaerobicEffect[ecoregion.Index] / (double)ClimateRegionData.ActiveSiteCount[ecoregion]);
 
                     monthlyLog.AddObject(ml);
@@ -781,7 +785,7 @@ namespace Landis.Extension.Succession.NECN
                 
                     if (site.IsActive)
                     {
-                        pixel.MapCode.Value = (int)((SiteVars.MeanSoilWaterContent[site])); //changed to mean
+                        pixel.MapCode.Value = (int)((SiteVars.MeanSoilWater[site])); //changed to mean
                     }
                     else
                     {
@@ -790,9 +794,29 @@ namespace Landis.Extension.Succession.NECN
                     }
                     outputRaster.WriteBufferPixel();
                 }
-
             }
 
+
+            string pathsoilwaterContent = MapNames.ReplaceTemplateVars(@"NECN/SoilWaterContent-{timestep}.tif", PlugIn.ModelCore.CurrentTime);
+            using (IOutputRaster<IntPixel> outputRaster = PlugIn.ModelCore.CreateRaster<IntPixel>(pathsoilwaterContent, PlugIn.ModelCore.Landscape.Dimensions))
+            {
+                IntPixel pixel = outputRaster.BufferPixel;
+                foreach (Site site in PlugIn.ModelCore.Landscape.AllSites)
+                {
+
+                    if (site.IsActive)
+                    {
+                        pixel.MapCode.Value = (int)(SiteVars.MeanSoilWater[site] / SiteVars.SoilDepth[site]*100);
+                    }
+                    else
+                    {
+                        //  Inactive site
+                        pixel.MapCode.Value = 0;
+                    }
+                    outputRaster.WriteBufferPixel();
+                }
+            }
+            
             if (PlugIn.Parameters.SmokeModelOutputs)
             {
                 string pathNeedles = MapNames.ReplaceTemplateVars(@"NECN/ConiferNeedleBiomass-{timestep}.tif", PlugIn.ModelCore.CurrentTime);

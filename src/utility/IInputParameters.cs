@@ -19,6 +19,7 @@ namespace Landis.Extension.Succession.NECN
         string ClimateConfigFile { get; set; }
         string SoilDepthMapName { get; set; }
         string SoilDrainMapName { get; set; }
+        string SoilMoistureMapName { get; set; }
         string SoilBaseFlowMapName { get; set; }
         string SoilStormFlowMapName { get; set; }
         string SoilFieldCapacityMapName { get; set; }
@@ -135,6 +136,7 @@ namespace Landis.Extension.Succession.NECN
         Landis.Library.Parameters.Species.AuxParm<double> K_LAI { get; }
         Landis.Library.Parameters.Species.AuxParm<double> MinLAI { get; }
         Landis.Library.Parameters.Species.AuxParm<double> MaxLAI { get; }
+        Landis.Library.Parameters.Species.AuxParm<double> CompetitionIndex { get; }
         Landis.Library.Parameters.Species.AuxParm<double> Moisturecurve1 { get; }
         Landis.Library.Parameters.Species.AuxParm<double> Moisturecurve2 { get; }
         Landis.Library.Parameters.Species.AuxParm<double> Moisturecurve3 { get; }

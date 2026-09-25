@@ -102,6 +102,12 @@ namespace Landis.Extension.Succession.NECN
             ReadVar(soilDrainMapName);
             parameters.SoilDrainMapName = soilDrainMapName.Value;
 
+            InputVar<string> soilMoistureMapName = new InputVar<string>("SoilMoistureMapName");
+            if (ReadOptionalVar(soilMoistureMapName))
+            {
+                parameters.SoilMoistureMapName = soilMoistureMapName.Value;
+            }
+
             InputVar<string> soilBaseFlowMapName = new InputVar<string>("SoilBaseFlowMapName");
             ReadVar(soilBaseFlowMapName);
             parameters.SoilBaseFlowMapName = soilBaseFlowMapName.Value;
@@ -472,6 +478,7 @@ namespace Landis.Extension.Succession.NECN
                 parameters.SetKLAI(species, System.Convert.ToDouble(row["KLAI"]));
                 parameters.SetMaxLAI(species, System.Convert.ToDouble(row["MaximumLAI"]));
                 parameters.SetMinLAI(species, ReadMinLAI(row));
+                parameters.SetCompetitionIndex(species, ReadCompetitionIndex(row));
                 parameters.SetMoistureCurve1(species, System.Convert.ToDouble(row["MoistureCurve1"]));
                 parameters.SetMoistureCurve2(species, System.Convert.ToDouble(row["MoistureCurve2"]));
                 parameters.SetMoistureCurve3(species, System.Convert.ToDouble(row["MoistureCurve3"]));
@@ -777,6 +784,19 @@ namespace Landis.Extension.Succession.NECN
             catch
             {
                 return 0.1;
+            }
+        }
+
+        private double ReadCompetitionIndex(DataRow row)
+        {
+            try
+            {
+                double competitionIndex = System.Convert.ToDouble(row["CompetitionIndex"]);
+                return competitionIndex;
+            }
+            catch
+            {
+                return 0.14;
             }
         }
         //Optional MoistureCurve1
